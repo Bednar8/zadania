@@ -1,0 +1,40 @@
+version: "3"
+services:
+  mysql:
+    container_name: mysql
+    image: mysql:5.7
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_DATABASE: prestashop
+    networks:
+      - prestashop_network
+    volumes:
+      - dbdata:/var/lib/mysql
+  prestashop:
+    container_name: prestashop
+    image: prestashop/prestashop:latest
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - 8080:80
+    environment:
+      DB_SERVER: mysql
+      DB_NAME: prestashop
+      DB_USER: root
+      DB_PASSWD: admin
+      PS_FOLDER_ADMIN: admin-dev
+      PS_FOLDER_INSTALL: install
+    networks:
+      - prestashop_network
+    volumes:
+      - type: bind
+        source: ./modules/lowestshipping
+        target: /var/www/html/modules/lowestshipping
+      - psdata:/var/www/html
+networks:
+  prestashop_network:
+volumes:
+  psdata:
+  dbdata:
